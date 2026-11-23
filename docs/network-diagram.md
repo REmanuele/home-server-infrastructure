@@ -1,22 +1,20 @@
-# Network diagram
+# Network diagram — local demonstration
 
 ```text
-Internet
-   |
-Router / Firewall
-   |
-Home Server
-   |-- Caddy reverse proxy :80/:443
-   |-- Docker network
-   |   |-- Web app
-   |   |-- PostgreSQL
-   |   |-- Redis
-   |
-   |-- WireGuard VPN
+                          Host computer
+                     127.0.0.1:8080 (HTTP)
+                               |
+                         Caddy :80
+                               |
+                     Docker proxy network
+                               |
+                         demo-app :80
+                      (Nginx default page)
+
+   Separate Docker data network (internal: true)
+                |                    |
+          PostgreSQL :5432       Redis :6379
+          (named volume)         (no host port)
 ```
 
-## Notes
-
-- Public services should go through the reverse proxy.
-- Internal services should not be exposed directly to the internet.
-- Administration should be restricted to LAN or VPN.
+These networks are intentionally disconnected: the demo app does not query either database or cache. This diagram does **not** show real public DNS, a WireGuard VPN, or HTTPS deployment.

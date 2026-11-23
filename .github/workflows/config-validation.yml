@@ -1,0 +1,22 @@
+name: Validate lab examples
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  configuration:
+    runs-on: ubuntu-latest
+    env:
+      # CI-only disposable value; no service is deployed.
+      POSTGRES_PASSWORD: ci-validation-placeholder-not-a-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run repository checks
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Check Docker Compose configuration (no containers started)
+        run: docker compose -f docker-compose.example.yml config -q

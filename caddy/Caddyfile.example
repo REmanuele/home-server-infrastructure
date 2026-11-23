@@ -1,7 +1,5 @@
-example.com {
-    reverse_proxy app:3000
-}
-
-photos.example.com {
-    reverse_proxy immich-server:2283
+:80 {
+    # LOCAL HTTP example. HTTPS/public hostnames require separate configuration.
+    encode gzip
+    reverse_proxy demo-app:80
 }

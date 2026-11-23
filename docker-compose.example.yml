@@ -1,37 +1,46 @@
-services:
-  postgres:
-    image: postgres:16
-    container_name: example-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: example_db
-      POSTGRES_USER: example_user
-      POSTGRES_PASSWORD: change_me
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - internal
+name: home-server-lab
 
-  redis:
-    image: redis:7
-    container_name: example-redis
+# Local, illustrative Compose stack. Not a production deployment.
+services:
+  demo-app:
+    image: nginx:stable-alpine
     restart: unless-stopped
     networks:
-      - internal
+      - proxy
 
   caddy:
     image: caddy:2
-    container_name: example-caddy
     restart: unless-stopped
+    depends_on:
+      - demo-app
     ports:
-      - "80:80"
-      - "443:443"
+      # Loopback-only: local laboratory access, not exposed to the LAN/Internet.
+      - "127.0.0.1:8080:80"
     volumes:
       - ./caddy/Caddyfile.example:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     networks:
-      - internal
+      - proxy
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lab_db
+      POSTGRES_USER: lab_user
+      # Fails configuration if the value is unset or empty.
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in an untracked .env file}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - data
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    networks:
+      - data
 
 volumes:
   postgres_data:
@@ -39,5 +48,8 @@ volumes:
   caddy_config:
 
 networks:
-  internal:
-    driver: bridge
+  # Only reverse proxy and demo app are attached here.
+  proxy: {}
+  # Isolated from external routing; no published database/cache ports.
+  data:
+    internal: true
