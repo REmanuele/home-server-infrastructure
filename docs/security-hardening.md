@@ -1,28 +1,22 @@
-# Security hardening checklist
+# Host hardening — review checklist (not applied automatically)
 
 ## SSH
 
-- Disable root login
-- Use key-based authentication where possible
-- Restrict SSH to LAN/VPN when possible
-- Keep the system updated
+- Use key-based authentication and disable root password login after confirming an alternative administrative path.
+- Limit management access to a trusted LAN or VPN when appropriate.
+- Test a second active SSH session and a recovery path **before** changing remote access policy.
+- Keep packages and firmware updated on a documented schedule.
 
-## Firewall
+## Firewall and Docker
 
-Example UFW baseline:
+- Start from an inventory of deliberately exposed services and host interfaces.
+- This lab publishes only `127.0.0.1:8080` for local HTTP testing. No database/cache ports are published.
+- Docker port publishing can bypass assumptions about host firewall rules; validate host rules and actual exposure together.
+- Do not blindly run example UFW commands on a remote server: an incorrect rule can lock out SSH access.
 
-```bash
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw allow from 192.168.1.0/24 to any port 22 proto tcp
-sudo ufw allow from 10.8.0.0/24 to any port 22 proto tcp
-sudo ufw enable
-```
+## Secrets and updates
 
-## Secrets
-
-- Store secrets in `.env` files not tracked by Git
-- Rotate passwords periodically
-- Never publish private keys or tokens
+- Do not commit `.env`, private keys, tokens, database dumps or real IP/domain configurations.
+- Use a different, unique PostgreSQL password in each lab environment. The Compose file refuses missing/empty passwords.
+- Image tags here are examples, not immutable version pins. Review updates and use digests for deployment reproducibility.
+- Redis has no authentication in this isolated lab example. Never expose it to untrusted networks.

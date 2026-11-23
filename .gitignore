@@ -1,5 +1,17 @@
+# Private configuration and secrets
 .env
+.env.*
+!.env.example
+secrets/
 *.key
 *.pem
+
+# Logs and backups (may include private data)
 *.log
 backup*.sql
+backups/
+*.sql
+
+# Local tool artifacts
+__pycache__/
+*.pyc
